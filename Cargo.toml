@@ -1,0 +1,7 @@
+[package]
+name = "u-boot-da"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serialport = "4.7.3"

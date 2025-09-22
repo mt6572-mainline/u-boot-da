@@ -1,0 +1,10 @@
+[package]
+name = "u-boot-da"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = { version = "4.5.48", features = ["derive"] }
+clap-num = "1.2.0"
+serialport = "4.7.3"
+thiserror = "2.0.16"

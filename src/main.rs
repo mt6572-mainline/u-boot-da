@@ -87,11 +87,8 @@ fn send_da(port: &mut Port, addr: u32, payload: &[u8]) -> Result<()> {
     port.echo_u32(0)?;
 
     let mut buf = [0; 2];
+    /* Status is always 0 */
     port.read_exact(&mut buf)?;
-    let status = u16::from_be_bytes(buf);
-    if status != 0 {
-        return Err(format!("Got non-zero status while sending DA info: {status}").into());
-    }
 
     port.write_all(payload)?;
 
@@ -99,7 +96,7 @@ fn send_da(port: &mut Port, addr: u32, payload: &[u8]) -> Result<()> {
     port.read_exact(&mut buf)?;
     let status = u16::from_be_bytes(buf);
     if status != 0 {
-        Err(format!("Failed to send U-Boot: {status}").into())
+        Err(format!("usbdl_verify_da failed, DAA may be enabled: {status}").into())
     } else {
         Ok(())
     }
@@ -110,13 +107,10 @@ fn jump_da(port: &mut Port, addr: u32) -> Result<()> {
     port.echo_addr(addr)?;
 
     let mut buf = [0; 2];
+    /* Status is always 0 if DA verification passed (it is at this point) */
     port.read_exact(&mut buf)?;
-    let status = u16::from_be_bytes(buf);
-    if status != 0 {
-        Err(format!("Failed jumping to {addr:#x}").into())
-    } else {
-        Ok(())
-    }
+
+    Ok(())
 }
 
 fn run(uboot: &[u8]) -> Result<()> {

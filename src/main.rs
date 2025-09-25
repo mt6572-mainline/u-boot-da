@@ -143,9 +143,14 @@ fn run(uboot: &[u8]) -> Result<()> {
         .timeout(Duration::from_millis(500))
         .open()?;
 
+    /* Read "READY", just to be safe let's expect it may appear up to 4 times */
+    let mut buf = [0; 20];
+    port.read(&mut buf)?;
+
     let mut buf = [0; 1];
     loop {
         port.write(&[0xa0])?;
+        port.flush()?;
         port.read_exact(&mut buf)?;
 
         if buf[0] == 0x5f {
@@ -157,8 +162,9 @@ fn run(uboot: &[u8]) -> Result<()> {
         port.write_and_check(byte, !byte)?;
     }
 
+    /* Clean garbage because we spam with handshake  */
     sleep(Duration::from_millis(200));
-    port.clear(serialport::ClearBuffer::All)?; // clean garbage because ???
+    port.clear(serialport::ClearBuffer::All)?;
 
     println!("Handshake completed");
     println!("Uploading U-Boot to {DA_ADDR:#x}...");
